@@ -1,0 +1,19 @@
+version: "v1.0"
+name: Pipeline
+agent:
+    machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+    - name: "Build test & push"
+    # comment
+    task:
+        jobs:
+        - name: Tests
+        commands:
+            - echo $GCE_CREDS | base64 --decode > gce-creds.json
+            - checkout
+            - make configure.gcloud
+            - make build
+            - make test.ci
+            - make push
