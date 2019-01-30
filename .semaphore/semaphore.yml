@@ -1,19 +1,56 @@
-version: "v1.0"
-name: Pipeline
+version: v1.0
+name: First pipeline example
 agent:
-    machine:
+  machine:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-    - name: "Build test & push"
-    # comment
+  - name: "Build"
     task:
-        jobs:
-        - name: Tests
+      env_vars:
+        - name: APP_ENV
+          value: prod
+      jobs:
+      - name: Docker build
         commands:
-            - echo $GCE_CREDS | base64 --decode > gce-creds.json
-            - checkout
-            - make configure.gcloud
-            - make build
-            - make test.ci
-            - make push
+          - checkout
+          - ls -1
+          - echo $APP_ENV
+          - echo "Docker build..."
+          - echo "done"
+  - name: "Smoke tests"
+    task:
+      jobs:
+      - name: Smoke
+        commands:
+          - checkout
+          - echo "make smoke"
+  - name: "Unit tests"
+    task:
+      jobs:
+      - name: RSpec
+        commands:
+          - checkout
+          - echo "make rspec"
+      - name: Lint code
+        commands:
+          - checkout
+          - echo "make lint"
+      - name: Check security
+        commands:
+          - checkout
+          - echo "make security"
+  - name: "Integration tests"
+    task:
+      jobs:
+      - name: Cucumber
+        commands:
+          - checkout
+          - echo "make cucumber"
+  - name: "Push Image"
+    task:
+      jobs:
+      - name: Push
+        commands:
+          - checkout
+          - echo "make docker.push"
